@@ -73,7 +73,7 @@
     let editId = null;
 
     async function loadPersons() {
-        const res = await axios.get('http://localhost:8080/person/get');
+        const res = await axios.get('https://person-manager-app-production.up.railway.app/person/get');
         personTable.innerHTML = '';
         res.data.forEach(p => {
             personTable.innerHTML += `
@@ -91,7 +91,7 @@
 
     async function deletePerson(id) {
         if(confirm('Delete this person?')) {
-            await axios.delete('http://localhost:8080/person/delete/'+id);
+            await axios.delete('https://person-manager-app-production.up.railway.app/person/delete/'+id);
             showNotification('Person deleted successfully 🗑️');
             loadPersons();
         }
@@ -112,15 +112,11 @@
         };
         try {
             if (editId) {
-                await axios.put('http://localhost:8080/person/update/'+editId, data, {
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                await axios.put('https://person-manager-app-production.up.railway.app/person/update/'+editId, data, { headers: { 'Content-Type': 'application/json' } });
                 showNotification('Person updated successfully 🎉');
                 editId = null;
             } else {
-                await axios.post('http://localhost:8080/person/add', data, {
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                await axios.post('https://person-manager-app-production.up.railway.app/person/add', data, { headers: { 'Content-Type': 'application/json' } });
                 showNotification('Person added successfully ✅');
             }
             form.reset();
