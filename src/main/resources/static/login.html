@@ -11,11 +11,7 @@
     <button type="submit">Login</button>
 </form>
 
-<script>
-    // Clear any existing credentials
-    localStorage.removeItem('basicAuth');
-    localStorage.removeItem('userId');
-
+<<script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value;
@@ -28,8 +24,15 @@
         });
 
         if (resp.ok) {
+          const data = await resp.json();
+
+          // ✅ Save actual userId
+          const res = await fetch('/auth/userId', { headers: { 'Authorization': 'Basic ' + basic } });
+          const userId = await res.text();
+
           localStorage.setItem('basicAuth', basic);
-          localStorage.setItem('userId', username);
+          localStorage.setItem('userId', userId);
+
           window.location.href = '/index.html';
         } else {
           alert('Invalid username/password');
@@ -39,5 +42,6 @@
       }
     });
 </script>
+
 </body>
 </html>

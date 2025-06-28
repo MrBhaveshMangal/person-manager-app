@@ -9,3 +9,4 @@ public class EmaildemoApplication {
 		SpringApplication.run(EmaildemoApplication.class, args);
 	}
 }
+	

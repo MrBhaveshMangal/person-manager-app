@@ -1,53 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Person Manager</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        body { font-family: Arial,sans-serif; padding: 20px; }
-        h2 { margin-top: 40px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table, th, td { border: 1px solid #ccc; }
-        th, td { padding: 10px; text-align: left; }
-        button { padding: 5px 10px; cursor: pointer; }
-        .notification {
-          position: fixed; top: 20px; right: -320px;
-          background: #4caf50; color: white; padding: 16px 24px;
-          border-radius: 8px; opacity: 0; transition: all 0.5s ease;
-        }
-        .notification.show { right: 20px; opacity: 1; }
-    </style>
-</head>
-<body>
-<h2>Add Person</h2>
-<form id="personForm">
-    <input id="name" placeholder="Name" required>
-    <input id="email" placeholder="Email" required type="email">
-    <input id="dob" placeholder="YYYY-MM-DD" required type="date">
-    <button type="submit">Save</button>
-</form>
-
-<h2>Person List</h2>
-<table>
-    <thead>
-    <tr><th>Name</th><th>Email</th><th>DOB</th><th>Actions</th></tr>
-    </thead>
-    <tbody id="personTable"></tbody>
-</table>
-
-<div id="notification" class="notification"></div>
-
 <script>
     const authHeader = localStorage.getItem('basicAuth');
-    const userId = localStorage.getItem('userId');
 
-    if (!authHeader || !userId) {
-      window.location.href = '/login.html';
+    if (!authHeader) {
+        window.location.href = '/login.html';
     }
 
     const axiosInstance = axios.create({
-      baseURL: '', ,
-      headers: { Authorization: 'Basic ' + authHeader }
+        baseURL: '',
+        headers: { Authorization: 'Basic ' + authHeader }
     });
 
     const personTable = document.getElementById('personTable');
@@ -55,83 +15,80 @@
     let editId = null;
 
     async function loadPersons() {
-      try {
-        const res = await axiosInstance.get('/person/get');
-        personTable.innerHTML = '';
-        res.data.forEach(p => {
-          personTable.innerHTML += `
-            <tr>
-              <td>${p.name}</td>
-              <td>${p.email}</td>
-              <td>${p.dateOfBirth}</td>
-              <td>
-                <button onclick="editPerson('${p.id}', '${p.name}', '${p.email}', '${p.dateOfBirth}')">Edit</button>
-                <button onclick="deletePerson('${p.id}')">Delete</button>
-              </td>
-            </tr>
-          `;
-        });
-      } catch (error) {
-        if (error.response && error.response.status === 401) {
-          localStorage.clear();
-          window.location.href = '/login.html';
-        } else {
-          alert('Error loading persons');
+        try {
+            const res = await axiosInstance.get('/person/get');
+            personTable.innerHTML = '';
+            res.data.forEach(p => {
+                personTable.innerHTML += `
+                    <tr>
+                      <td>${p.name}</td>
+                      <td>${p.email}</td>
+                      <td>${p.dateOfBirth}</td>
+                      <td>
+                        <button onclick="editPerson('${p.id}', '${p.name}', '${p.email}', '${p.dateOfBirth}')">Edit</button>
+                        <button onclick="deletePerson('${p.id}')">Delete</button>
+                      </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            if (error.response && error.response.status === 401) {
+                localStorage.clear();
+                window.location.href = '/login.html';
+            } else {
+                alert('Error loading persons');
+            }
         }
-      }
     }
 
     async function deletePerson(id) {
-      if (confirm('Delete this person?')) {
-        await axiosInstance.delete('/person/delete/' + id);
-        showNotification('Person deleted successfully 🗑️');
-        loadPersons();
-      }
+        if (confirm('Delete this person?')) {
+            await axiosInstance.delete('/person/delete/' + id);
+            showNotification('Person deleted successfully 🗑️');
+            loadPersons();
+        }
     }
 
     function editPerson(id, name, email, dob) {
-      editId = id;
-      document.getElementById('name').value = name;
-      document.getElementById('email').value = email;
-      document.getElementById('dob').value = dob;
+        editId = id;
+        document.getElementById('name').value = name;
+        document.getElementById('email').value = email;
+        document.getElementById('dob').value = dob;
     }
 
     async function savePerson() {
-      const data = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        dateOfBirth: document.getElementById('dob').value,
-        userId: userId
-      };
-      try {
-        if (editId) {
-          await axiosInstance.put('/person/update/' + editId, data);
-          showNotification('Person updated successfully 🎉');
-          editId = null;
-        } else {
-          await axiosInstance.post('/person/add', data);
-          showNotification('Person added successfully ✅');
+        const data = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            dateOfBirth: document.getElementById('dob').value
+        };
+        try {
+            if (editId) {
+                await axiosInstance.put('/person/update/' + editId, data);
+                showNotification('Person updated successfully 🎉');
+                editId = null;
+            } else {
+                await axiosInstance.post('/person/add', data);
+                showNotification('Person added successfully ✅');
+            }
+            form.reset();
+            loadPersons();
+        } catch (error) {
+            alert('Error: ' + (error.response?.data || error.message));
         }
-        form.reset();
-        loadPersons();
-      } catch (error) {
-        alert('Error: ' + (error.response?.data || error.message));
-      }
     }
 
     form.addEventListener('submit', e => {
-      e.preventDefault();
-      savePerson();
+        e.preventDefault();
+        savePerson();
     });
 
     function showNotification(message) {
-      const notif = document.getElementById('notification');
-      notif.textContent = message;
-      notif.classList.add('show');
-      setTimeout(() => notif.classList.remove('show'), 2500);
+        const notif = document.getElementById('notification');
+        notif.textContent = message;
+        notif.classList.add('show');
+        setTimeout(() => notif.classList.remove('show'), 2500);
     }
 
     loadPersons();
 </script>
-</body>
-</html>
