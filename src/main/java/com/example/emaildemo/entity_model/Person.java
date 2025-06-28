@@ -10,13 +10,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 @Data
-@Document(collection="Persons")
+@Document(collection = "Persons")
 public class Person {
 
     @Id
     private String id;
 
-    @NotBlank(message="Name is required")
+    @NotBlank(message = "Name is required")
     private String name;
 
     @NotBlank(message = "Email is required")
@@ -25,4 +25,6 @@ public class Person {
 
     @NotBlank(message = "Date of Birth is required")
     private String dateOfBirth;
+
+    private String userId;
 }

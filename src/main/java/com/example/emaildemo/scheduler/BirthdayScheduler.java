@@ -22,7 +22,7 @@ public class BirthdayScheduler {
 
     private final DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    @Scheduled(cron = "0 0 9 * * *")//Everyday at 9 AM
+    @Scheduled(cron = "*/20 * * * * *")//Everyday at 9 AM
     public void sendBirthdayEmails(){
         LocalDate today=LocalDate.now();
         List<Person> people=personRepository.findAll();
