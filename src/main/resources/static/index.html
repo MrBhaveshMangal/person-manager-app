@@ -1,6 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Person Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .notification {
+            background: #dff0d8;
+            color: #3c763d;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+    </style>
+</head>
+<body style="font-family:Arial,sans-serif;padding:20px;">
+
+<h2>Person Manager</h2>
+
+<form id="personForm">
+    <input id="name" placeholder="Name" required><br><br>
+    <input id="email" placeholder="Email" required><br><br>
+    <input id="dob" placeholder="Date of Birth (YYYY-MM-DD)" required><br><br>
+    <button type="submit">Save</button>
+</form>
+
+<div id="notification" class="notification"></div>
+
+<h3>Persons</h3>
+<table border="1" cellpadding="8" id="personTable"></table>
+
 <script>
     const authHeader = localStorage.getItem('basicAuth');
-
     if (!authHeader) {
         window.location.href = '/login.html';
     }
@@ -17,7 +52,9 @@
     async function loadPersons() {
         try {
             const res = await axiosInstance.get('/person/get');
-            personTable.innerHTML = '';
+            personTable.innerHTML = `
+                <tr><th>Name</th><th>Email</th><th>DOB</th><th>Actions</th></tr>
+            `;
             res.data.forEach(p => {
                 personTable.innerHTML += `
                     <tr>
@@ -92,3 +129,5 @@
 
     loadPersons();
 </script>
+</body>
+</html>

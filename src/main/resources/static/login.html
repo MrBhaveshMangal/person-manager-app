@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body style="font-family:Arial,sans-serif;padding:20px;">
 <h2>Login</h2>
@@ -11,37 +12,34 @@
     <button type="submit">Login</button>
 </form>
 
-<<script>
+<script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const basic = btoa(username + ':' + password);
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const basic = btoa(username + ':' + password);
 
-      try {
-        const resp = await fetch('/person/get', {
-          headers: { 'Authorization': 'Basic ' + basic }
-        });
+        try {
+            const resp = await fetch('/person/get', {
+                headers: { 'Authorization': 'Basic ' + basic }
+            });
 
-        if (resp.ok) {
-          const data = await resp.json();
+            if (resp.ok) {
+                // Save credentials and redirect
+                const res = await fetch('/auth/userId', { headers: { 'Authorization': 'Basic ' + basic } });
+                const userId = await res.text();
 
-          // ✅ Save actual userId
-          const res = await fetch('/auth/userId', { headers: { 'Authorization': 'Basic ' + basic } });
-          const userId = await res.text();
+                localStorage.setItem('basicAuth', basic);
+                localStorage.setItem('userId', userId);
 
-          localStorage.setItem('basicAuth', basic);
-          localStorage.setItem('userId', userId);
-
-          window.location.href = '/index.html';
-        } else {
-          alert('Invalid username/password');
+                window.location.href = '/index.html';
+            } else {
+                alert('Invalid username/password');
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
         }
-      } catch (err) {
-        alert('Network error: ' + err.message);
-      }
     });
 </script>
-
 </body>
 </html>
