@@ -8,7 +8,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
@@ -20,29 +19,35 @@ public class BirthdayScheduler {
     @Autowired
     private EmailService emailService;
 
-    private final DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Kolkata") // Every 5 seconds
+    public void sendBirthdayEmails() {
+        LocalDate today = LocalDate.now();
+        System.out.println("📅 Running birthday check at: " + today);
 
-    @Scheduled(cron = "*/20 * * * * *")//Everyday at 9 AM
-    public void sendBirthdayEmails(){
-        LocalDate today=LocalDate.now();
-        List<Person> people=personRepository.findAll();
-        for(Person person:people){
-            LocalDate dob=LocalDate.parse(person.getDateOfBirth(),formatter);
+        List<Person> people = personRepository.findAll();
+        for (Person person : people) {
+            try {
+                String dobStr = person.getDateOfBirth().substring(0, 10); // Ensure format
+                LocalDate dob = LocalDate.parse(dobStr);
 
-            if(dob.getDayOfMonth()==today.getDayOfMonth() && dob.getMonth()==today.getMonth()){
-                String htmlBody = "<h2 style='color:#007bff;'>🎉 Happy Birthday " + person.getName() + "!</h2>" +
-                        "<p style='font-size:16px;'>Dear <b>" + person.getName() + "</b>,</p>" +
-                        "<p>Wishing you a <span style='color:#28a745;'>joyful</span> and <span style='color:#ff5733;'>successful</span> year ahead!</p>" +
-                        "<p>🎂🎈 Enjoy your special day!</p>";
+                if (dob.getDayOfMonth() == today.getDayOfMonth() &&
+                        dob.getMonth() == today.getMonth()) {
 
+                    String htmlBody = "<h2 style='color:#007bff;'>🎉 Happy Birthday " + person.getName() + "!</h2>" +
+                            "<p>Dear <b>" + person.getName() + "</b>, wishing you a great year ahead! 🎂🎈</p>";
 
-                emailService.sendHtmlEmail(
-                        person.getEmail(),"Happy Birthday "+person.getName(),
-                        htmlBody
-                );
-                System.out.println("Sent Birthday mail to: "+person.getEmail());
+                    emailService.sendHtmlEmail(
+                            person.getEmail(),
+                            "Happy Birthday " + person.getName(),
+                            htmlBody
+                    );
+
+                    System.out.println("✅ Sent birthday email to: " + person.getEmail());
+                }
+
+            } catch (Exception e) {
+                System.out.println("⚠️ Error for person: " + person.getName() + " - " + e.getMessage());
             }
         }
     }
-
 }

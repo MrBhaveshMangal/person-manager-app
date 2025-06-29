@@ -15,6 +15,8 @@ public class EmailController {
     @Autowired
     private EmailService emailService;
 
+
+
     @GetMapping("/send")
     public String sendEmail(@RequestParam(required = false) String to,
                             @RequestParam(required = false) String subject,
