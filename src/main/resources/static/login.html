@@ -26,7 +26,9 @@
 
             if (resp.ok) {
                 // Save credentials and redirect
-                const res = await fetch('/auth/userId', { headers: { 'Authorization': 'Basic ' + basic } });
+                const res = await fetch('/auth/userId', {
+                    headers: { 'Authorization': 'Basic ' + basic }
+                });
                 const userId = await res.text();
 
                 localStorage.setItem('basicAuth', basic);
@@ -35,9 +37,11 @@
                 window.location.href = '/index.html';
             } else {
                 alert('Invalid username/password');
+                document.getElementById('password').value = '';
             }
         } catch (err) {
             alert('Network error: ' + err.message);
+            document.getElementById('password').value = '';
         }
     });
 </script>
