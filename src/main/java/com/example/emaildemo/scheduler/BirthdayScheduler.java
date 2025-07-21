@@ -19,7 +19,7 @@ public class BirthdayScheduler {
     @Autowired
     private EmailService emailService;
 
-    @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Kolkata") // Every 5 seconds
+    @Scheduled(cron = "*/20 * * * * *", zone = "Asia/Kolkata") // Every 5 seconds
     public void sendBirthdayEmails() {
         LocalDate today = LocalDate.now();
         System.out.println("📅 Running birthday check at: " + today);
@@ -27,7 +27,7 @@ public class BirthdayScheduler {
         List<Person> people = personRepository.findAll();
         for (Person person : people) {
             try {
-                String dobStr = person.getDateOfBirth().substring(0, 10); // Ensure format
+                String dobStr = person.getDateOfBirth().toString(); // Ensure format
                 LocalDate dob = LocalDate.parse(dobStr);
 
                 if (dob.getDayOfMonth() == today.getDayOfMonth() &&

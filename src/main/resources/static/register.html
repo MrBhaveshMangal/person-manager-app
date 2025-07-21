@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+          box-sizing: border-box;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+          background: #f5f7fa;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+        }
+
+        .container {
+          background: white;
+          padding: 40px 30px;
+          border-radius: 12px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+          width: 100%;
+          max-width: 400px;
+        }
+
+        h2 {
+          text-align: center;
+          margin-bottom: 25px;
+          color: #333;
+        }
+
+        input {
+          width: 100%;
+          padding: 12px;
+          margin: 10px 0;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          font-size: 15px;
+          transition: border 0.3s;
+        }
+
+        input:focus {
+          border-color: #4CAF50;
+          outline: none;
+        }
+
+        button {
+          width: 100%;
+          padding: 12px;
+          margin-top: 10px;
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          font-size: 16px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+
+        button:hover {
+          background-color: #45a049;
+        }
+
+        .message {
+          color: red;
+          font-size: 14px;
+          margin-top: 12px;
+          text-align: center;
+        }
+
+        .switch-link {
+          margin-top: 20px;
+          display: block;
+          text-align: center;
+        }
+
+        .switch-link button {
+          background-color: #2196F3;
+        }
+
+        .switch-link button:hover {
+          background-color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <form id="registerForm" autocomplete="off" novalidate>
+        <h2>Create Account</h2>
+
+        <input id="registerUsername" placeholder="Username" required autocomplete="off">
+        <input id="registerPassword" type="password" placeholder="Password" required autocomplete="new-password">
+        <input id="registerEmail" type="email" placeholder="Email" required autocomplete="off">
+
+        <button type="button" onclick="sendOtp()">Send OTP</button>
+
+        <!-- Hidden initially -->
+        <div id="otpBlock" style="display:none">
+            <input id="registerOtp" placeholder="Enter OTP" required autocomplete="off">
+        </div>
+
+        <button type="submit">Register</button>
+        <div id="message" class="message"></div>
+    </form>
+
+    <div class="switch-link">
+        <button onclick="location.href='login.html'">🔐 Already have an account? Login</button>
+    </div>
+</div>
+
+<script>
+    axios.defaults.withCredentials = true;
+    const API_BASE_URL = 'http://localhost:8080'; // ✅ Backend URL
+
+    async function sendOtp() {
+        const email = document.getElementById('registerEmail').value.trim();
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = '';
+
+        if (!email) {
+            messageDiv.textContent = 'Please enter email.';
+            return;
+        }
+
+        try {
+            const check = await axios.get(`${API_BASE_URL}/auth/email-exists?email=${encodeURIComponent(email)}`);
+            if (check.data.exists) {
+                messageDiv.textContent = '❌ Email already registered.';
+                return;
+            }
+
+            await axios.post(`${API_BASE_URL}/auth/send-otp`, { email }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            alert('✅ OTP sent to your email!');
+            document.getElementById('otpBlock').style.display = 'block'; // 👈 Show OTP input now
+        } catch (err) {
+            messageDiv.textContent = '❌ Failed to send OTP.';
+            console.error(err);
+        }
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById('registerUsername').value.trim();
+        const password = document.getElementById('registerPassword').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const otp = document.getElementById('registerOtp').value.trim();
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = '';
+
+        if (!username || !password || !email || !otp) {
+            messageDiv.textContent = 'Please fill all fields.';
+            return;
+        }
+
+        try {
+            await axios.post(`${API_BASE_URL}/auth/verify-otp`, { email, otp }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            await axios.post(`${API_BASE_URL}/auth/register`, { username, password, email }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            alert('✅ Registration successful! Please login.');
+            window.location.href = 'login.html';
+        } catch (err) {
+            const errorMsg = err.response?.data?.message || err.response?.data || 'Something went wrong.';
+            messageDiv.textContent = '❌ ' + errorMsg;
+            console.error(err);
+        }
+    });
+</script>
+</body>
+</html>
