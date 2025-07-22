@@ -91,7 +91,11 @@ public class UserController {
     public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequest req) {
         try {
             userService.registerUser(req.getUsername(), req.getPassword(), req.getEmail());
-            return ResponseEntity.ok("User registered successfully.");
+
+            // ✅ Send OTP after successful registration
+            otpService.sendOtp(req.getEmail().trim().toLowerCase());
+
+            return ResponseEntity.ok("User registered successfully. OTP sent to your email.");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
