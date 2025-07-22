@@ -23,10 +23,10 @@ public class EmailController {
                             @RequestParam(required = false) String body) {
 
         if (to == null || to.isBlank() || subject == null || subject.isBlank() || body == null || body.isBlank()) {
-            return "❌ Missing required parameters: to, subject, body";
+            return " Missing required parameters: to, subject, body";
         }
 
         emailService.sendHtmlEmail(to, subject, body);
-        return "✅ Email sent successfully";
+        return " Email sent successfully";
     }
 }

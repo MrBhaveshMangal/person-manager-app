@@ -28,12 +28,11 @@ public class PersonController {
     @Autowired
     private EmailService emailService;
 
-    // 🔄 Reusable method to get current user ID
     private String getCurrentUserId(Authentication auth) {
         return String.valueOf(userService.findByUsername(auth.getName()).getId());
     }
 
-    // ➕ Add Person
+    // Add Person
     @PostMapping("/add")
     public ResponseEntity<?> addPerson(@Valid @RequestBody Person person, Authentication auth) {
         String userId = getCurrentUserId(auth);
@@ -62,7 +61,6 @@ public class PersonController {
         return ResponseEntity.ok(saved);
     }
 
-    // 👤 Get Logged-in Person Info
     @GetMapping("/me")
     public ResponseEntity<Person> getLoggedInPerson(Authentication auth) {
         String userId = getCurrentUserId(auth);
@@ -73,14 +71,14 @@ public class PersonController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 📥 Get All Persons for Current User
+
     @GetMapping("/get")
     public ResponseEntity<List<Person>> getAllPersons(Authentication auth) {
         String userId = getCurrentUserId(auth);
         return ResponseEntity.ok(personRepository.findByUserId(userId));
     }
 
-    // ✏️ Update Person
+    // Update Person
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updatePerson(
             @PathVariable String id,
@@ -106,7 +104,7 @@ public class PersonController {
         return ResponseEntity.ok(personRepository.save(existingPerson));
     }
 
-    // ❌ Delete Person
+    //  Delete Person
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deletePerson(@PathVariable String id, Authentication auth) {
         String userId = getCurrentUserId(auth);

@@ -28,7 +28,7 @@ public class UserService {
         User user = new User();
         user.setUsername(u);
         user.setEmail(em);
-        user.setPassword(passwordEncoder.encode(rawPassword));   // 🔑 encode
+        user.setPassword(passwordEncoder.encode(rawPassword));
 
         userRepository.save(user);
     }
@@ -37,7 +37,7 @@ public class UserService {
         return userRepository.findByUsernameIgnoreCase(username.trim().toLowerCase());
     }
 
-    public Optional<User> getUserByEmail(String email) { // ✅ ✅ ✅ ADDED THIS METHOD
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmailIgnoreCase(email.trim().toLowerCase());
     }
 

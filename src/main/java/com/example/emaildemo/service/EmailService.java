@@ -24,12 +24,12 @@
                 helper.setFrom("bhaveshmangal.1210@gmail.com");
                 helper.setTo(toEmail);
                 helper.setSubject(subject);
-                helper.setText(htmlBody, true); // true => HTML content
+                helper.setText(htmlBody, true);
 
                 mailSender.send(mimeMessage);
-                System.out.println("✅ HTML Email sent to " + toEmail);
+                System.out.println(" HTML Email sent to " + toEmail);
             } catch (MessagingException e) {
-                System.out.println("❌ Failed to send HTML Email: " + e.getMessage());
+                System.out.println(" Failed to send HTML Email: " + e.getMessage());
             }
         }
     }

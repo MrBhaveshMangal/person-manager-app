@@ -19,7 +19,7 @@ public class BirthdayScheduler {
     @Autowired
     private EmailService emailService;
 
-    @Scheduled(cron = "*/20 * * * * *", zone = "Asia/Kolkata") // Every 5 seconds
+    @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Kolkata")
     public void sendBirthdayEmails() {
         LocalDate today = LocalDate.now();
         System.out.println("📅 Running birthday check at: " + today);
@@ -27,7 +27,7 @@ public class BirthdayScheduler {
         List<Person> people = personRepository.findAll();
         for (Person person : people) {
             try {
-                String dobStr = person.getDateOfBirth().toString(); // Ensure format
+                String dobStr = person.getDateOfBirth().toString();
                 LocalDate dob = LocalDate.parse(dobStr);
 
                 if (dob.getDayOfMonth() == today.getDayOfMonth() &&
@@ -42,11 +42,11 @@ public class BirthdayScheduler {
                             htmlBody
                     );
 
-                    System.out.println("✅ Sent birthday email to: " + person.getEmail());
+                    System.out.println(" Sent birthday email to: " + person.getEmail());
                 }
 
             } catch (Exception e) {
-                System.out.println("⚠️ Error for person: " + person.getName() + " - " + e.getMessage());
+                System.out.println("⚠ Error for person: " + person.getName() + " - " + e.getMessage());
             }
         }
     }

@@ -15,9 +15,9 @@ public class StartupEmailSender implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception{
         emailService.sendHtmlEmail(
-                "test@gmail.com",        //Receiver mail
-                "App automatically start",                 // Subject
-                "This email was sent as soon as the app start"//body
+                "test@gmail.com",
+                "App automatically start",
+                "This email was sent as soon as the app start"
         );
     }
 }

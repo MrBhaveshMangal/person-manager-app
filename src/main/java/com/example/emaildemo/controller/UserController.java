@@ -28,7 +28,7 @@ public class UserController {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private AuthenticationManager authenticationManager;
 
-    // ========================= 🔐 OTP =========================
+    // OTP
 
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@Valid @RequestBody SendOtpRequest req) {
@@ -85,7 +85,7 @@ public class UserController {
         return ResponseEntity.ok("OTP verified");
     }
 
-    // ========================= 👤 Registration/Login =========================
+    // 👤 Registration/Login
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequest req) {
@@ -117,8 +117,7 @@ public class UserController {
         }
     }
 
-    // ========================= 🔎 Lookup & Verification =========================
-
+    // Lookup & Verification
     @GetMapping("/check-email")
     public ResponseEntity<?> checkEmail(@RequestParam String email) {
         boolean exists = userService.getUserByEmail(email).isPresent();
@@ -162,7 +161,7 @@ public class UserController {
         ));
     }
 
-    // ========================= 🔄 Reset Password =========================
+    //Reset Password
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> payload) {
@@ -185,7 +184,7 @@ public class UserController {
         return ResponseEntity.ok("Password reset successfully");
     }
 
-    // ========================= 👥 User Info =========================
+    //👥 User Info
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Authentication auth) {

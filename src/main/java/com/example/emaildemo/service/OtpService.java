@@ -17,7 +17,6 @@ public class OtpService {
 
     private final Map<String, String> otpStorage = new ConcurrentHashMap<>();
 
-    // ✅ Send OTP
     public void sendOtp(String email) {
         try {
             String otp = String.valueOf(new Random().nextInt(900000) + 100000); // 6-digit OTP
@@ -30,21 +29,21 @@ public class OtpService {
             message.setText("Your OTP is: " + otp + "\n\nThis OTP will expire in 5 minutes.");
 
             mailSender.send(message);
-            System.out.println("✅ OTP sent to: " + email + " | OTP: " + otp);
+            System.out.println(" OTP sent to: " + email + " | OTP: " + otp);
 
         } catch (Exception e) {
-            System.err.println("❌ Failed to send OTP to " + email + ": " + e.getMessage());
+            System.err.println(" Failed to send OTP to " + email + ": " + e.getMessage());
             throw new RuntimeException("Email sending failed: " + e.getMessage());
         }
     }
 
-    // ✅ Verify OTP
+    // Verify OTP
     public boolean verifyOtp(String email, String otp) {
         String storedOtp = otpStorage.get(email);
         return otp != null && otp.equals(storedOtp);
     }
 
-    // ✅ Clear OTP after use
+    // Clear OTP after use
     public void clearOtp(String email) {
         otpStorage.remove(email);
     }

@@ -20,7 +20,6 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-    // ---------------- password + auth‑provider ----------------
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -39,25 +38,15 @@ public class SecurityConfig {
         return cfg.getAuthenticationManager();
     }
 
-    // ---------------- main filter‑chain ----------------
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // allow preflight
-                        .requestMatchers(
-                                "/auth/**",
-                                "/register.html",
-                                "/login.html",
-                                "/forgot-password.html",
-                                "/index.html",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
                 .httpBasic()
