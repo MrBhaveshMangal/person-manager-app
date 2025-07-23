@@ -162,21 +162,23 @@
         }
 
         try {
-            await axios.post(`${API_BASE_URL}/auth/verify-otp`, { email, otp }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
+    const res = await axios.post(`${API_BASE_URL}/auth/send-otp`, { email }, {
+        headers: { 'Content-Type': 'application/json' }
+    });
 
-            await axios.post(`${API_BASE_URL}/auth/register`, { username, password, email }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
+    if (res.status === 200) {
+        alert('✅ OTP sent to your email!');
+        document.getElementById('otpBlock').style.display = 'block';
+    } else {
+        messageDiv.textContent = '❌ Failed to send OTP.';
+        console.log(res); // log the response
+    }
+} catch (err) {
+    const errorMsg = err.response?.data?.message || '❌ Failed to send OTP.';
+    messageDiv.textContent = errorMsg;
+    console.error('Axios error:', err);
+}
 
-            alert('✅ Registration successful! Please login.');
-            window.location.href = 'login.html';
-        } catch (err) {
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Something went wrong.';
-            messageDiv.textContent = '❌ ' + errorMsg;
-            console.error(err);
-        }
     });
 </script>
 </body>
