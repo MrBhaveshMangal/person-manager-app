@@ -104,6 +104,12 @@ public class PersonController {
         return ResponseEntity.ok(personRepository.save(existingPerson));
     }
 
+    @GetMapping("/userinfo")
+    public ResponseEntity<?> getUserInfo(Authentication auth) {
+        User user = userService.findByUsername(auth.getName());
+        return ResponseEntity.ok(user);
+    }
+
     //  Delete Person
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deletePerson(@PathVariable String id, Authentication auth) {

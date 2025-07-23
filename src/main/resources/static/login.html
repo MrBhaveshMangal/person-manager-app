@@ -99,7 +99,7 @@
   const basic = btoa(username + ':' + password);
 
   try {
-    const resp = await fetch('/person/get', {
+    const resp = await fetch('/person/userinfo', {
       headers: { 'Authorization': 'Basic ' + basic }
     });
 
