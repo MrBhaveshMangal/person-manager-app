@@ -93,41 +93,43 @@
 
 <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const basic = btoa(username + ':' + password);
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const basic = btoa(username + ':' + password);
 
-      try {
-        const resp = await fetch('/person/get', {
-          headers: { 'Authorization': 'Basic ' + basic }
-        });
-
-        if (!resp.ok) {
-          alert('❌ Invalid username or password.');
-          document.getElementById('password').value = '';
-          return;
-        }
-
-        const userData = await resp.json();
-
-        // ✅ Handle array or object response
-        const user = Array.isArray(userData) ? userData[0] : userData;
-        const userName = user.name || user.username || 'User';
-
-        // ✅ Store to localStorage
-        localStorage.setItem('basicAuth', basic);
-        localStorage.setItem('userId', user.id);
-        localStorage.setItem('username', userName);
-
-        // ✅ Redirect
-        window.location.href = '/index.html';
-
-      } catch (err) {
-        alert('❌ Network error: ' + err.message);
-        document.getElementById('password').value = '';
-      }
+  try {
+    const resp = await fetch('/person/get', {
+      headers: { 'Authorization': 'Basic ' + basic }
     });
+
+    if (!resp.ok) {
+      alert('❌ Invalid username or password.');
+      document.getElementById('password').value = '';
+      return;
+    }
+
+    const userData = await resp.json();
+
+    if (!userData || (Array.isArray(userData) && userData.length === 0)) {
+      alert('❌ No user data found.');
+      return;
+    }
+
+    const user = Array.isArray(userData) ? userData[0] : userData;
+    const userName = user?.name || user?.username || 'User';
+
+    localStorage.setItem('basicAuth', basic);
+    localStorage.setItem('userId', user.id);
+    localStorage.setItem('username', userName);
+
+    window.location.href = '/index.html';
+
+  } catch (err) {
+    alert('❌ Network error: ' + err.message);
+    document.getElementById('password').value = '';
+  }
+});
 </script>
 
 </body>
