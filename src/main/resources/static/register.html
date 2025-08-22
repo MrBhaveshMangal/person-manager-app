@@ -66,6 +66,11 @@
           background-color: #45a049;
         }
 
+        button:disabled {
+          background-color: #bbb;
+          cursor: not-allowed;
+        }
+
         .message {
           color: red;
           font-size: 14px;
@@ -97,14 +102,14 @@
         <input id="registerPassword" type="password" placeholder="Password" required autocomplete="new-password">
         <input id="registerEmail" type="email" placeholder="Email" required autocomplete="off">
 
-        <button type="button" onclick="sendOtp()">Send OTP</button>
+        <button type="button" id="sendOtpBtn" onclick="sendOtp()">Send OTP</button>
 
         <!-- Hidden initially -->
         <div id="otpBlock" style="display:none">
             <input id="registerOtp" placeholder="Enter OTP" required autocomplete="off">
         </div>
 
-        <button type="submit">Register</button>
+        <button type="submit" id="registerBtn" disabled>Register</button>
         <div id="message" class="message"></div>
     </form>
 
@@ -114,75 +119,79 @@
 </div>
 
 <script>
-    axios.defaults.withCredentials = true;
-    const API_BASE_URL = 'https://person-manager-app.onrender.com';
+    const API_BASE_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:8080'
+    : 'https://person-manager-app.onrender.com';
 
     async function sendOtp() {
-        const email = document.getElementById('registerEmail').value.trim();
-        const messageDiv = document.getElementById('message');
-        messageDiv.textContent = '';
+      const email = document.getElementById('registerEmail').value.trim().toLowerCase();
+      const messageDiv = document.getElementById('message');
+      const sendOtpBtn = document.getElementById('sendOtpBtn');
+      const registerBtn = document.getElementById('registerBtn');
+      messageDiv.textContent = '';
 
-        if (!email) {
-            messageDiv.textContent = 'Please enter email.';
-            return;
+      if (!email) {
+        messageDiv.textContent = '❌ Please enter an email.';
+        return;
+      }
+
+      try {
+        // ✅ First check if email exists
+        const check = await axios.get(
+          `${API_BASE_URL}/auth/email-exists?email=${encodeURIComponent(email)}`,
+          { headers: { 'Accept': 'application/json' } }
+        );
+
+        if (check.data.exists) {
+          messageDiv.textContent = '❌ Email already registered.';
+          return;
         }
 
-        try {
-            const check = await axios.get(`${API_BASE_URL}/auth/email-exists?email=${encodeURIComponent(email)}`);
-            if (check.data.exists) {
-                messageDiv.textContent = '❌ Email already registered.';
-                return;
-            }
+        // ✅ Send OTP
+        await axios.post(`${API_BASE_URL}/auth/send-otp`, { email });
+        alert('✅ OTP sent to your email!');
 
-            await axios.post(`${API_BASE_URL}/auth/send-otp`, { email }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
+        // Show OTP field + enable register button
+        document.getElementById('otpBlock').style.display = 'block';
+        registerBtn.disabled = false;
+        sendOtpBtn.disabled = true;
 
-            alert('✅ OTP sent to your email!');
-            document.getElementById('otpBlock').style.display = 'block'; // Show OTP input
-        } catch (err) {
-            messageDiv.textContent = '❌ Failed to send OTP.';
-            console.error(err);
-        }
+      } catch (err) {
+        messageDiv.textContent = err.response?.data?.error || '❌ Failed to send OTP.';
+        console.error(err);
+      }
     }
 
     document.getElementById('registerForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
+      e.preventDefault();
 
-        const username = document.getElementById('registerUsername').value.trim();
-        const password = document.getElementById('registerPassword').value.trim();
-        const email = document.getElementById('registerEmail').value.trim();
-        const otp = document.getElementById('registerOtp').value.trim();
-        const messageDiv = document.getElementById('message');
-        messageDiv.textContent = '';
+      const username = document.getElementById('registerUsername').value.trim();
+      const password = document.getElementById('registerPassword').value.trim();
+      const email = document.getElementById('registerEmail').value.trim().toLowerCase();
+      const otp = document.getElementById('registerOtp').value.trim();
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = '';
 
-        if (!username || !password || !email || !otp) {
-            messageDiv.textContent = 'Please fill all fields.';
-            return;
-        }
+      if (!username || !password || !email || !otp) {
+        messageDiv.textContent = '⚠️ Please fill all fields.';
+        return;
+      }
 
-        try {
-            const res = await axios.post(`${API_BASE_URL}/auth/register`, {
-                username,
-                password,
-                email,
-                otp
-            }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
+      try {
+        // ✅ Step 1: Verify OTP
+        await axios.post(`${API_BASE_URL}/auth/verify-otp`, { email, otp });
 
-            if (res.status === 200) {
-                alert('✅ Registration successful!');
-                window.location.href = 'login.html';
-            } else {
-                messageDiv.textContent = '❌ Registration failed.';
-                console.log(res);
-            }
-        } catch (err) {
-            const errorMsg = err.response?.data?.message || '❌ Registration failed.';
-            messageDiv.textContent = errorMsg;
-            console.error('Axios error:', err);
-        }
+        // ✅ Step 2: Register user
+        await axios.post(`${API_BASE_URL}/auth/register`, { username, password, email });
+
+        alert('✅ Registration successful!');
+        window.location.href = 'login.html';
+      } catch (err) {
+        const errorMsg = err.response?.data?.error || '❌ Registration failed.';
+        messageDiv.textContent = errorMsg;
+        console.error('Axios error:', err);
+      }
     });
 </script>
 </body>

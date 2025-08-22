@@ -8,9 +8,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://person-manager-app.onrender.com") // ✅ specific frontend domain
+                .allowedOrigins("http://localhost:8080",
+                        "https://person-manager-frontend.netlify.app") // ✅ apna frontend domain
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true); // ✅ allow credentials
+                .allowCredentials(true);
     }
 }

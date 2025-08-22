@@ -19,7 +19,8 @@
 
     @RestController
     @RequestMapping("/auth")
-    @CrossOrigin("*")
+//    @CrossOrigin("*")
+    @CrossOrigin(origins = {"http://localhost:8080", "https://person-manager-app.onrender.com"})
     public class UserController {
 
         @Autowired private UserService userService;
@@ -34,10 +35,10 @@
         public ResponseEntity<?> sendOtp(@Valid @RequestBody SendOtpRequest req) {
             try {
                 otpService.sendOtp(req.getEmail().trim().toLowerCase());
-                return ResponseEntity.ok("OTP sent to your email.");
+                return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
             } catch (Exception e) {
                 e.printStackTrace();
-                return ResponseEntity.status(500).body("Failed to send OTP: " + e.getMessage());
+                return ResponseEntity.status(500).body(Map.of("error", "Failed to send OTP", "details", e.getMessage()));
             }
         }
 
@@ -46,9 +47,9 @@
             String email = req.getEmail().trim().toLowerCase();
             if (otpService.verifyOtp(email, req.getOtp())) {
                 otpService.clearOtp(email);
-                return ResponseEntity.ok("OTP verified.");
+                return ResponseEntity.ok(Map.of("message", "OTP verified."));
             } else {
-                return ResponseEntity.badRequest().body("Invalid or expired OTP.");
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired OTP"));
             }
         }
 
@@ -59,15 +60,17 @@
 
             Optional<User> user = userRepository.findByEmailIgnoreCase(email);
             if (user.isEmpty()) {
-                return ResponseEntity.status(404).body("Email not found");
+                return ResponseEntity.status(404).body(Map.of("error", "Email not found"));
+
             }
 
             try {
                 otpService.sendOtp(email);
-                return ResponseEntity.ok("OTP sent for password reset");
+                return ResponseEntity.ok(Map.of("message", "OTP sent for password reset"));
             } catch (Exception e) {
                 e.printStackTrace();
-                return ResponseEntity.status(500).body("Failed to send OTP: " + e.getMessage());
+                return ResponseEntity.status(500).body(Map.of("error", "Failed to send OTP", "details", e.getMessage()));
+
             }
         }
 
@@ -78,11 +81,11 @@
 
             boolean valid = otpService.verifyOtp(email, otp);
             if (!valid) {
-                return ResponseEntity.badRequest().body("Invalid or expired OTP");
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired OTP"));
             }
-
             otpService.clearOtp(email);
-            return ResponseEntity.ok("OTP verified");
+            return ResponseEntity.ok(Map.of("message", "OTP verified"));
+
         }
 
         // 👤 Registration/Login
@@ -91,15 +94,15 @@
         public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequest req) {
             try {
                 userService.registerUser(req.getUsername(), req.getPassword(), req.getEmail());
-                return ResponseEntity.ok("User registered successfully.");
+                return ResponseEntity.ok(Map.of("message", "User registered successfully."));
             } catch (RuntimeException e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
+                return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
             }
         }
 
         @PostMapping("/login")
-        public ResponseEntity<String> login() {
-            return ResponseEntity.ok("Login successful");
+        public ResponseEntity<?> login() {
+            return ResponseEntity.ok(Map.of("message", "Login successful"));
         }
 
         @PostMapping("/login-body")
@@ -111,9 +114,10 @@
                         )
                 );
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                return ResponseEntity.ok("Login successful");
+                return ResponseEntity.ok(Map.of("message", "Login successful"));
+
             } catch (Exception e) {
-                return ResponseEntity.status(401).body("Invalid credentials ❌");
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials ❌"));
             }
         }
 
@@ -121,26 +125,38 @@
         @GetMapping("/check-email")
         public ResponseEntity<?> checkEmail(@RequestParam String email) {
             boolean exists = userService.getUserByEmail(email).isPresent();
-            return ResponseEntity.ok(exists);
+            return ResponseEntity.ok(Map.of("exists", exists));
+
         }
 
         @GetMapping("/email-exists")
-        public ResponseEntity<?> emailExists(@RequestParam String email) {
-            boolean exists = userRepository.findByEmailIgnoreCase(email.trim().toLowerCase()).isPresent();
-            return ResponseEntity.ok(Map.of("exists", exists));
+        public ResponseEntity<?> emailExists(@RequestParam(required = false) String email) {
+            try {
+                if (email == null || email.trim().isEmpty()) {
+                    return ResponseEntity.badRequest().body(Map.of("error", "Email parameter is missing"));
+                }
+
+                boolean exists = userRepository.findByEmailIgnoreCase(email.trim().toLowerCase()).isPresent();
+                return ResponseEntity.ok(Map.of("exists", exists));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(500).body(Map.of("error", "Internal server error", "details", e.getMessage()));
+            }
         }
 
         @GetMapping("/check-username")
         public ResponseEntity<?> checkUsername(@RequestParam String username) {
             boolean exists = userService.getUserByUsername(username).isPresent();
-            return ResponseEntity.ok(exists);
+            return ResponseEntity.ok(Map.of("exists", exists));
+
         }
 
         @PostMapping("/check-user")
         public ResponseEntity<?> checkUser(@RequestBody Map<String, String> payload) {
             String input = payload.get("identifier");
             if (input == null || input.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Identifier is missing.");
+                return ResponseEntity.badRequest().body(Map.of("error", "Identifier is missing."));
             }
 
             input = input.trim().toLowerCase();
@@ -151,8 +167,9 @@
             }
 
             if (userOpt.isEmpty()) {
-                return ResponseEntity.status(404).body("User not found");
+                return ResponseEntity.status(404).body(Map.of("error", "User not found"));
             }
+
 
             User user = userOpt.get();
             return ResponseEntity.ok(Map.of(
@@ -169,19 +186,19 @@
             String password = payload.get("password");
 
             if (email == null || password == null || password.length() < 6) {
-                return ResponseEntity.badRequest().body("Invalid input");
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid input"));
             }
 
             User user;
             try {
                 user = userService.findByEmail(email);
             } catch (RuntimeException e) {
-                return ResponseEntity.status(404).body("Email not found");
+                return ResponseEntity.status(404).body(Map.of("error", "Email not found"));
             }
 
             user.setPassword(passwordEncoder.encode(password));
             userRepository.save(user);
-            return ResponseEntity.ok("Password reset successfully");
+            return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
         }
 
         //👥 User Info
@@ -201,12 +218,12 @@
         @GetMapping("/whoami")
         public ResponseEntity<?> getCurrentUser(Authentication auth) {
             if (auth == null || !auth.isAuthenticated()) {
-                return ResponseEntity.status(401).body("Not authenticated");
+                return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
             }
 
             Optional<User> userOpt = userService.getUserByUsername(auth.getName());
             if (userOpt.isEmpty()) {
-                return ResponseEntity.status(404).body("User not found");
+                return ResponseEntity.status(404).body(Map.of("error", "User not found"));
             }
 
             User user = userOpt.get();
