@@ -120,35 +120,48 @@
 
 <script>
     const API_BASE_URL =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:8080'
-    : 'https://person-manager-app-1.onrender.com';
+      window.location.hostname === 'localhost'
+        ? 'http://localhost:8080'
+        : 'https://person-manager-app-1.onrender.com';
 
     async function sendOtp() {
+      const username = document.getElementById('registerUsername').value.trim();
       const email = document.getElementById('registerEmail').value.trim().toLowerCase();
       const messageDiv = document.getElementById('message');
       const sendOtpBtn = document.getElementById('sendOtpBtn');
       const registerBtn = document.getElementById('registerBtn');
       messageDiv.textContent = '';
 
-      if (!email) {
-        messageDiv.textContent = '❌ Please enter an email.';
+      //  Check for username and email first
+      if (!username || !email) {
+        messageDiv.textContent = ' Please enter both Username and Email.';
         return;
       }
 
       try {
-        // ✅ First check if email exists
-        const check = await axios.get(
+        // Check if username exists
+        const userCheck = await axios.get(
+          `${API_BASE_URL}/auth/check-username?username=${encodeURIComponent(username)}`,
+          { headers: { 'Accept': 'application/json' } }
+        );
+
+        if (userCheck.data.exists) {
+          messageDiv.textContent = '❌ Username already taken.';
+          return;
+        }
+
+        // ✅ Check if email exists
+        const emailCheck = await axios.get(
           `${API_BASE_URL}/auth/email-exists?email=${encodeURIComponent(email)}`,
           { headers: { 'Accept': 'application/json' } }
         );
 
-        if (check.data.exists) {
+        if (emailCheck.data.exists) {
           messageDiv.textContent = '❌ Email already registered.';
           return;
         }
 
-        // ✅ Send OTP
+        // ✅ Send OTP (only if both username + email are free)
         await axios.post(`${API_BASE_URL}/auth/send-otp`, { email });
         alert('✅ OTP sent to your email!');
 
@@ -179,13 +192,13 @@
       }
 
       try {
-        // ✅ Step 1: Verify OTP
+        // Step 1: Verify OTP
         await axios.post(`${API_BASE_URL}/auth/verify-otp`, { email, otp });
 
-        // ✅ Step 2: Register user
+        //  Step 2: Register user
         await axios.post(`${API_BASE_URL}/auth/register`, { username, password, email });
 
-        alert('✅ Registration successful!');
+        alert(' Registration successful!');
         window.location.href = 'login.html';
       } catch (err) {
         const errorMsg = err.response?.data?.error || '❌ Registration failed.';

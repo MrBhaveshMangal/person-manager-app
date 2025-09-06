@@ -156,30 +156,17 @@
 
 <script>
     const authHeader = localStorage.getItem('basicAuth');
+    const userName = localStorage.getItem('username');
     if (!authHeader) window.location.href = '/login.html';
 
     const axiosInstance = axios.create({
-      baseURL: '',
       headers: { Authorization: 'Basic ' + authHeader }
     });
 
-    // 🔁 Get current user name from /person/me
-    (async () => {
-      try {
-        const res = await axiosInstance.get('/person/me');
-        const person = res.data;
-        if (person && person.name) {
-          document.getElementById('usernameDisplay').textContent = `👤 ${person.name}`;
-        }
-      } catch (err) {
-        console.error('Failed to load user info:', err);
-        // fallback to username from localStorage
-        const username = localStorage.getItem('username');
-        if (username) {
-          document.getElementById('usernameDisplay').textContent = `👤 ${username}`;
-        }
-      }
-    })();
+    // Set username display directly from localStorage
+    if (userName) {
+      document.getElementById('usernameDisplay').textContent = `👤 ${userName}`;
+    }
 
     const form = document.getElementById('personForm');
     const tableBody = document.querySelector('#personTable tbody');
@@ -220,7 +207,7 @@
     async function deletePerson(id) {
       if (confirm('Delete this person?')) {
         await axiosInstance.delete('/person/delete/' + id);
-        showNotification('Person deleted successfully 🗑️');
+        showNotification('Person deleted successfully ');
         loadPersons();
       }
     }
@@ -242,11 +229,11 @@
       try {
         if (editId) {
           await axiosInstance.put('/person/update/' + editId, data);
-          showNotification('Person updated successfully ✅');
+          showNotification('Person updated successfully');
           editId = null;
         } else {
           await axiosInstance.post('/person/add', data);
-          showNotification('Person added successfully ✅');
+          showNotification('Person added successfully');
         }
         form.reset();
         loadPersons();
@@ -274,7 +261,5 @@
 
     loadPersons();
 </script>
-
-
 </body>
 </html>

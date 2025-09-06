@@ -1,142 +1,142 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <title>Login</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        * {
-          box-sizing: border-box;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Login</title>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <style>
+            * {
+              box-sizing: border-box;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
 
-        body {
-          background: #f5f7fa;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          margin: 0;
-        }
+            body {
+              background: #f5f7fa;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+            }
 
-        .container {
-          background: white;
-          padding: 40px 30px;
-          border-radius: 12px;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-          width: 100%;
-          max-width: 400px;
-        }
+            .container {
+              background: white;
+              padding: 40px 30px;
+              border-radius: 12px;
+              box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+              width: 100%;
+              max-width: 400px;
+            }
 
-        h2 {
-          text-align: center;
-          margin-bottom: 25px;
-          color: #333;
-        }
+            h2 {
+              text-align: center;
+              margin-bottom: 25px;
+              color: #333;
+            }
 
-        input {
-          width: 100%;
-          padding: 12px;
-          margin: 10px 0;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-          font-size: 15px;
-        }
+            input {
+              width: 100%;
+              padding: 12px;
+              margin: 10px 0;
+              border: 1px solid #ccc;
+              border-radius: 6px;
+              font-size: 15px;
+            }
 
-        button {
-          width: 100%;
-          padding: 12px;
-          margin-top: 10px;
-          background-color: #4CAF50;
-          color: white;
-          border: none;
-          font-size: 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: background-color 0.3s;
-        }
+            button {
+              width: 100%;
+              padding: 12px;
+              margin-top: 10px;
+              background-color: #4CAF50;
+              color: white;
+              border: none;
+              font-size: 16px;
+              border-radius: 6px;
+              cursor: pointer;
+              transition: background-color 0.3s;
+            }
 
-        button:hover {
-          background-color: #45a049;
-        }
+            button:hover {
+              background-color: #45a049;
+            }
 
-        .link-button {
-          background-color: #2196F3;
-        }
+            .link-button {
+              background-color: #2196F3;
+            }
 
-        .link-button:hover {
-          background-color: #1976D2;
-        }
+            .link-button:hover {
+              background-color: #1976D2;
+            }
 
-        .extra-actions {
-          margin-top: 20px;
-          display: flex;
-          gap: 10px;
-          flex-direction: column;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h2>Login</h2>
-    <form id="loginForm">
-        <input id="username" placeholder="Username" required />
-        <input id="password" placeholder="Password" type="password" required />
-        <button type="submit">Login</button>
-    </form>
+            .extra-actions {
+              margin-top: 20px;
+              display: flex;
+              gap: 10px;
+              flex-direction: column;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input id="username" placeholder="Username/Email" required />
+            <input id="password" placeholder="Password" type="password" required />
+            <button type="submit">Login</button>
+        </form>
 
-    <div class="extra-actions">
-        <button class="link-button" onclick="location.href='register.html'">📝 Register</button>
-        <button class="link-button" onclick="location.href='forgot-password.html'">🔒 Forgot Password?</button>
+        <div class="extra-actions">
+            <button class="link-button" onclick="location.href='register.html'">📝 Register</button>
+            <button class="link-button" onclick="location.href='forgot-password.html'">🔒 Forgot Password?</button>
+        </div>
     </div>
-</div>
 
-<script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const basic = btoa(username + ':' + password);
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const basic = btoa(username + ':' + password);
 
-  try {
+      try {
 
-  const API_BASE =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:8080'
-    : 'https://person-manager-app-1.onrender.com';
+      const API_BASE =
+      window.location.hostname === 'localhost'
+        ? 'http://localhost:8080'
+        : 'https://person-manager-app-1.onrender.com';
 
-    const resp = await fetch(`${API_BASE}/person/userinfo`, {
-  headers: { 'Authorization': 'Basic ' + basic }
-});
+        const resp = await fetch(`${API_BASE}/person/userinfo`, {
+      headers: { 'Authorization': 'Basic ' + basic }
+    });
 
-    if (!resp.ok) {
-      alert('❌ Invalid username or password.');
-      document.getElementById('password').value = '';
-      return;
-    }
+        if (!resp.ok) {
+          alert('❌ Invalid username or password.');
+          document.getElementById('password').value = '';
+          return;
+        }
 
-    const userData = await resp.json();
+        const userData = await resp.json();
 
-    if (!userData || (Array.isArray(userData) && userData.length === 0)) {
-      alert('❌ No user data found.');
-      return;
-    }
+        if (!userData || (Array.isArray(userData) && userData.length === 0)) {
+          alert('❌ No user data found.');
+          return;
+        }
 
-    const user = Array.isArray(userData) ? userData[0] : userData;
-    const userName = user?.name || user?.username || 'User';
+        const user = Array.isArray(userData) ? userData[0] : userData;
+        const userName = user?.name || user?.username || 'User';
 
-    localStorage.setItem('basicAuth', basic);
-    localStorage.setItem('userId', user.id);
-    localStorage.setItem('username', userName);
+        localStorage.setItem('basicAuth', basic);
+        localStorage.setItem('userId', user.id);
+        localStorage.setItem('username', userName);
 
-    window.location.href = '/index.html';
+        window.location.href = '/index.html';
 
-  } catch (err) {
-    alert('❌ Network error: ' + err.message);
-    document.getElementById('password').value = '';
-  }
-});
-</script>
+      } catch (err) {
+        alert('❌ Network error: ' + err.message);
+        document.getElementById('password').value = '';
+      }
+    });
+    </script>
 
-</body>
-</html>
+    </body>
+    </html>
