@@ -1,127 +1,189 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Login</title>
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <style>
-            * {
-              box-sizing: border-box;
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-            body {
-              background: #f5f7fa;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              height: 100vh;
-              margin: 0;
-            }
+    <title>Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-            .container {
-              background: white;
-              padding: 40px 30px;
-              border-radius: 12px;
-              box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-              width: 100%;
-              max-width: 400px;
-            }
+    <style>
+        * {
+          box-sizing: border-box;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-            h2 {
-              text-align: center;
-              margin-bottom: 25px;
-              color: #333;
-            }
+        body {
+          background: #f5f7fa;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          margin: 0;
+          padding: 15px;
+        }
 
-            input {
-              width: 100%;
-              padding: 12px;
-              margin: 10px 0;
-              border: 1px solid #ccc;
-              border-radius: 6px;
-              font-size: 15px;
-            }
+        .container {
+          background: white;
+          padding: 40px 30px;
+          border-radius: 12px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+          width: 100%;
+          max-width: 420px;
+        }
 
-            button {
-              width: 100%;
-              padding: 12px;
-              margin-top: 10px;
-              background-color: #4CAF50;
-              color: white;
-              border: none;
-              font-size: 16px;
-              border-radius: 6px;
-              cursor: pointer;
-              transition: background-color 0.3s;
-            }
+        h2 {
+          text-align: center;
+          margin-bottom: 25px;
+          color: #333;
+          font-size: 22px;
+        }
 
-            button:hover {
-              background-color: #45a049;
-            }
+        input {
+          width: 100%;
+          padding: 12px;
+          margin: 10px 0;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          font-size: 16px;
+        }
 
-            .link-button {
-              background-color: #2196F3;
-            }
+        input:focus {
+          border-color: #4CAF50;
+          outline: none;
+        }
 
-            .link-button:hover {
-              background-color: #1976D2;
-            }
+        button {
+          width: 100%;
+          padding: 12px;
+          margin-top: 10px;
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          font-size: 16px;
+          border-radius: 6px;
+          cursor: pointer;
+          min-height: 44px;
+        }
 
-            .extra-actions {
-              margin-top: 20px;
-              display: flex;
-              gap: 10px;
-              flex-direction: column;
-            }
-        </style>
-    </head>
-    <body>
-    <div class="container">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <input id="username" placeholder="Username/Email" required />
-            <input id="password" placeholder="Password" type="password" required />
-            <button type="submit">Login</button>
-        </form>
+        button:disabled {
+          background-color: #bbb;
+          cursor: not-allowed;
+        }
 
-        <div class="extra-actions">
-            <button class="link-button" onclick="location.href='register.html'">📝 Register</button>
-            <button class="link-button" onclick="location.href='forgot-password.html'">🔒 Forgot Password?</button>
-        </div>
+        .link-button {
+          background-color: #2196F3;
+        }
+
+        .extra-actions {
+          margin-top: 20px;
+          display: flex;
+          gap: 10px;
+          flex-direction: column;
+        }
+
+        .message {
+          margin-top: 12px;
+          font-size: 14px;
+          text-align: center;
+          color: red;
+        }
+
+        .loader {
+          border: 3px solid rgba(255,255,255,0.4);
+          border-top: 3px solid white;
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        button.loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 25px 20px;
+          }
+
+          h2 {
+            font-size: 20px;
+          }
+
+          button {
+            font-size: 15px;
+          }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h2>Login</h2>
+
+    <form id="loginForm" novalidate>
+        <input id="username" placeholder="Username or Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <button type="submit" id="loginBtn">Login</button>
+        <div id="message" class="message"></div>
+    </form>
+
+    <div class="extra-actions">
+        <button class="link-button" onclick="location.href='register.html'">Register</button>
+        <button class="link-button" onclick="location.href='forgot-password.html'">Forgot Password?</button>
     </div>
+</div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const basic = btoa(username + ':' + password);
-
-      try {
-
-      const API_BASE =
+<script>
+    const API_BASE =
       window.location.hostname === 'localhost'
         ? 'http://localhost:8080'
         : 'https://person-manager-app-1.onrender.com';
 
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const messageDiv = document.getElementById('message');
+      const loginBtn = document.getElementById('loginBtn');
+
+      messageDiv.textContent = '';
+      messageDiv.style.color = 'red';
+
+      if (!username || !password) {
+        messageDiv.textContent = 'Username and password are required.';
+        return;
+      }
+
+      const basic = btoa(username + ':' + password);
+
+      loginBtn.classList.add('loading');
+      loginBtn.innerHTML = `<div class="loader"></div> Logging in...`;
+      loginBtn.disabled = true;
+
+      try {
         const resp = await fetch(`${API_BASE}/person/userinfo`, {
-      headers: { 'Authorization': 'Basic ' + basic }
-    });
+          headers: { Authorization: 'Basic ' + basic }
+        });
 
         if (!resp.ok) {
-          alert('❌ Invalid username or password.');
+          messageDiv.textContent = 'Invalid username or password.';
           document.getElementById('password').value = '';
           return;
         }
 
         const userData = await resp.json();
-
-        if (!userData || (Array.isArray(userData) && userData.length === 0)) {
-          alert('❌ No user data found.');
-          return;
-        }
-
         const user = Array.isArray(userData) ? userData[0] : userData;
         const userName = user?.name || user?.username || 'User';
 
@@ -129,14 +191,19 @@
         localStorage.setItem('userId', user.id);
         localStorage.setItem('username', userName);
 
-        window.location.href = '/index.html';
+        messageDiv.style.color = 'green';
+        messageDiv.textContent = 'Login successful.';
+        setTimeout(() => window.location.href = '/index.html', 700);
 
       } catch (err) {
-        alert('❌ Network error: ' + err.message);
+        messageDiv.textContent = 'Network error. Please try again.';
         document.getElementById('password').value = '';
+      } finally {
+        loginBtn.classList.remove('loading');
+        loginBtn.innerHTML = 'Login';
+        loginBtn.disabled = false;
       }
     });
-    </script>
-
-    </body>
-    </html>
+</script>
+</body>
+</html>

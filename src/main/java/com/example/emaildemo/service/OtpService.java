@@ -1,6 +1,8 @@
 package com.example.emaildemo.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -18,33 +20,30 @@ public class OtpService {
     private final Map<String, String> otpStorage = new ConcurrentHashMap<>();
 
     public void sendOtp(String email) {
-        try {
-            String otp = String.valueOf(new Random().nextInt(900000) + 100000); // 6-digit OTP
-            otpStorage.put(email, otp);
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
+        otpStorage.put(email, otp);
 
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("bhaveshmangal.1210@gmail.com");
-            message.setTo(email);
-            message.setSubject("Your OTP Code");
-            message.setText("Your OTP is: " + otp + "\n\nThis OTP will expire in 5 minutes.");
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("bhaveshmangal.1210@gmail.com");
+        message.setTo(email);
+        message.setSubject("Your OTP Code");
+        message.setText("Your OTP is: " + otp);
 
-            mailSender.send(message);
-            System.out.println(" OTP sent to: " + email + " | OTP: " + otp);
-
-        } catch (Exception e) {
-            System.err.println(" Failed to send OTP to " + email + ": " + e.getMessage());
-            throw new RuntimeException("Email sending failed: " + e.getMessage());
-        }
+        mailSender.send(message);
     }
 
-    // Verify OTP
     public boolean verifyOtp(String email, String otp) {
-        String storedOtp = otpStorage.get(email);
-        return otp != null && otp.equals(storedOtp);
+        return otp != null && otp.equals(otpStorage.get(email));
     }
 
-    // Clear OTP after use
     public void clearOtp(String email) {
         otpStorage.remove(email);
     }
+    @PostConstruct
+    public void checkKey() {
+        System.out.println("SMTP KEY LOADED = " +
+                System.getenv("BREVO_SMTP_KEY"));
+    }
 }
+
+

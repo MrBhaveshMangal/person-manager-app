@@ -153,30 +153,41 @@
         }
 
         @PostMapping("/check-user")
-        public ResponseEntity<?> checkUser(@RequestBody Map<String, String> payload) {
+        public ResponseEntity<?> checkUser(@RequestBody(required = false) Map<String, String> payload) {
+
+            if (payload == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Request body missing"));
+            }
+
             String input = payload.get("identifier");
+
             if (input == null || input.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Identifier is missing."));
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Identifier is required"));
             }
 
             input = input.trim().toLowerCase();
 
             Optional<User> userOpt = userRepository.findByEmailIgnoreCase(input);
+
             if (userOpt.isEmpty()) {
                 userOpt = userRepository.findByUsernameIgnoreCase(input);
             }
 
             if (userOpt.isEmpty()) {
-                return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+                return ResponseEntity.status(404)
+                        .body(Map.of("error", "User not found"));
             }
 
-
             User user = userOpt.get();
+
             return ResponseEntity.ok(Map.of(
                     "email", user.getEmail(),
                     "username", user.getUsername()
             ));
         }
+
 
         //Reset Password
 
